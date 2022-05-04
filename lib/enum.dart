@@ -1,0 +1,1 @@
+enum MenuState { home, groups, message, profile }

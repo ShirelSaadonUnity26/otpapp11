@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter/material.dart";
+import 'package:otpapp/home.dart';
 import 'package:otpapp/screens/home_screen.dart';
+import 'package:otpapp/screens/signUp/signup_screen.dart';
+import 'package:snack/snack.dart';
 
 enum MobileVerificationState {
   SHOW_MOBILE_FORM_STATE,
@@ -13,15 +16,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  //static String routeName = "/otp";
   MobileVerificationState currentState =
       MobileVerificationState.SHOW_MOBILE_FORM_STATE;
 
   final phoneController = TextEditingController();
   final otpController = TextEditingController();
 
-  FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  String verificationId;
+  String verificationId='';
 
   bool showLoading = false;
 
@@ -33,14 +37,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final authCredential =
-          await _auth.signInWithCredential(phoneAuthCredential);
+      await _auth.signInWithCredential(phoneAuthCredential);
 
       setState(() {
         showLoading = false;
       });
 
-      if(authCredential?.user != null){
-        Navigator.push(context, MaterialPageRoute(builder: (context)=> HomeScreen()));
+      if(authCredential.user != null){
+        //Navigator.pushNamed(context, CompleteProfileScreen.routeName);
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpPage()));
       }
 
     } on FirebaseAuthException catch (e) {
@@ -48,8 +53,6 @@ class _LoginScreenState extends State<LoginScreen> {
         showLoading = false;
       });
 
-      _scaffoldKey.currentState
-          .showSnackBar(SnackBar(content: Text(e.message)));
     }
   }
 
@@ -84,8 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 setState(() {
                   showLoading = false;
                 });
-                _scaffoldKey.currentState.showSnackBar(
-                    SnackBar(content: Text(verificationFailed.message)));
+
               },
               codeSent: (verificationId, resendingToken) async {
                 setState(() {
@@ -125,8 +127,8 @@ class _LoginScreenState extends State<LoginScreen> {
         FlatButton(
           onPressed: () async {
             PhoneAuthCredential phoneAuthCredential =
-                PhoneAuthProvider.credential(
-                    verificationId: verificationId, smsCode: otpController.text);
+            PhoneAuthProvider.credential(
+                verificationId: verificationId, smsCode: otpController.text);
 
             signInWithPhoneAuthCredential(phoneAuthCredential);
           },
@@ -148,11 +150,11 @@ class _LoginScreenState extends State<LoginScreen> {
         body: Container(
           child: showLoading
               ? Center(
-                  child: CircularProgressIndicator(),
-                )
+            child: CircularProgressIndicator(),
+          )
               : currentState == MobileVerificationState.SHOW_MOBILE_FORM_STATE
-                  ? getMobileFormWidget(context)
-                  : getOtpFormWidget(context),
+              ? getMobileFormWidget(context)
+              : getOtpFormWidget(context),
           padding: const EdgeInsets.all(16),
         ));
   }
